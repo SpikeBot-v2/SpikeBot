@@ -5,8 +5,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 # --- 設定 ---
 CARD_SIZE = (550, 300)  # 生成するカード1枚のサイズ
-FONT_PATH = "assets/BebasNeue-Regular.ttf"
-JA_FONT_PATH = "assets/NotoSansJP-Medium.ttf"
+FONT_PATH = "assets/fonts/BebasNeue-Regular.ttf"
+JA_FONT_PATH = "assets/fonts/NotoSansJP-Medium.ttf"
 FONT_SIZE = 12
 JA_FONT_SIZE = 24
 PRICE_FONT_SIZE = 24
