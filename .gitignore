@@ -2,3 +2,4 @@ __pycache__/
 .venv/
 temp_images/
 .env
+users.db
