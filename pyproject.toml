@@ -1,7 +1,7 @@
 [project]
-name = "spikebot-v2"
+name = "spikebot-v2-bot"
 version = "0.1.0"
-description = "Add your description here"
+description = "VALORANT utility bot for Discord"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
