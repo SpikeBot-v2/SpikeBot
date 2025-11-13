@@ -732,7 +732,7 @@ wheels = [
 ]
 
 [[package]]
-name = "spikebot-v2"
+name = "spikebot-v2-bot"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

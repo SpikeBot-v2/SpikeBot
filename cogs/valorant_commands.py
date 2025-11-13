@@ -5,6 +5,7 @@ from discord.ext import commands, tasks
 import asyncio
 import os
 import aiofiles
+import aiofiles.os
 import uuid
 import datetime
 import base64
@@ -208,7 +209,7 @@ class ValorantCommands(commands.Cog):
             title="Valorantアカウント連携ガイド",
             description=(
                 "**ステップ1: 拡張機能のインストール**\n"
-                "連携には専用のChrome拡張機能が必要です。[こちら](https://example.com/extension)からインストールしてください。（※現在はダミーリンクです）\n\n"
+                "連携には専用のChrome拡張機能が必要です。[こちら](https://github.com/SpikeBot-v2/SpikeBot-Extension/)からインストールしてください。\n\n"
                 "**ステップ2: 認証ページへアクセス**\n"
                 f"下のボタンまたは[こちらのリンク]({auth_url})をクリックしてRiot Gamesにログインしてください。\n"
                 "ログインが完了すると、自動的に認証情報が安全にボットへ送信されます。\n\n"
@@ -669,10 +670,17 @@ class ValorantCommands(commands.Cog):
             await send("ストア情報の処理中にエラーが発生しました。", ephemeral=is_ephemeral)
         
         finally:
+            # 非同期ファイル操作でイベントループのブロッキングを回避
             for path in temp_image_paths:
-                if os.path.exists(path): os.remove(path)
-            if final_image_path and os.path.exists(final_image_path):
-                os.remove(final_image_path)
+                try:
+                    await aiofiles.os.remove(path)
+                except FileNotFoundError:
+                    pass
+            if final_image_path:
+                try:
+                    await aiofiles.os.remove(final_image_path)
+                except FileNotFoundError:
+                    pass
 
     async def _get_storefront_with_reauth(self, account_id: int):
         """指定されたアカウントIDでストア情報を取得し、必要であれば再認証を行う"""

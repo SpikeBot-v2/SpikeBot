@@ -75,11 +75,22 @@ async def on_app_command_error(interaction: discord.Interaction, error: app_comm
         original_error = getattr(error, 'original', error)
         print(f"Unhandled error in command '{interaction.command.name}': {original_error}")
         
-        # 応答が完了しているか確認してから送信する、より安全な方法
+        # 応答が完了しているか確認し、状況に応じた方法でエラーメッセージを送信する
         if interaction.response.is_done():
+            # 既に応答済みの場合は、followupで新しいメッセージを送る
             await interaction.followup.send("コマンドの実行中に予期せぬエラーが発生しました。", ephemeral=True)
         else:
-            await interaction.response.send_message("コマンドの実行中に予期せぬエラーが発生しました。", ephemeral=True)
+            # 未応答またはdefer済みの場合は、まず通常の応答を試みる
+            try:
+                await interaction.response.send_message("コマンドの実行中に予期せぬエラーが発生しました。", ephemeral=True)
+            except discord.errors.HTTPException as e:
+                # "Interaction has already been acknowledged"エラーの場合
+                if e.code == 40060:
+                    # defer済みと判断し、followupでメッセージを送信する
+                    await interaction.followup.send("コマンドの実行中に予期せぬエラーが発生しました。", ephemeral=True)
+                else:
+                    # その他のHTTPエラーは再度送出する
+                    raise
 
 
 if __name__ == "__main__":
