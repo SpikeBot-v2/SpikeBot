@@ -153,8 +153,13 @@ class WebhookListenerCog(commands.Cog):
                     print(f"[DEBUG] Got user info: puuid={puuid[:10]}..., riot_id={riot_id}")
                 except Exception as e:
                     print(f"[DEBUG] Riot API authentication failed for user {user_id}: {e}")
-                    user = await self.bot.fetch_user(user_id)
-                    await user.send("Valorantアカウントの認証に失敗しました。時間をおいて`/link`からやり直してください。")
+                    try:
+                        user = await self.bot.fetch_user(user_id)
+                        await user.send("Valorantアカウントの認証に失敗しました。時間をおいて`/link`からやり直してください。")
+                    except discord.Forbidden:
+                        print(f"[DEBUG] Failed to send failure DM to user {user_id} (DM blocked).")
+                    except Exception as dm_error:
+                        print(f"[DEBUG] An unexpected error occurred while sending failure DM to user {user_id}: {dm_error}")
                     return
 
                 if cookies_str:
@@ -217,16 +222,21 @@ class WebhookListenerCog(commands.Cog):
                         session.add(new_account)
                         print(f"[DEBUG] Created new account: {account_name}")
 
-            user = await self.bot.fetch_user(user_id)
-            embed = discord.Embed(
-                title="✅ アカウント連携 成功",
-                description=f"Valorantアカウント **{riot_id}** の連携が正常に完了しました！\n`/store`コマンドでデイリーストアを確認できます。",
-                color=discord.Color.green(),
-                timestamp=datetime.datetime.now(datetime.timezone.utc)
-            )
+            try:
+                user = await self.bot.fetch_user(user_id)
+                embed = discord.Embed(
+                    title="✅ アカウント連携 成功",
+                    description=f"Valorantアカウント **{riot_id}** の連携が正常に完了しました！\n`/store`コマンドでデイリーストアを確認できます。",
+                    color=discord.Color.green(),
+                    timestamp=datetime.datetime.now(datetime.timezone.utc)
+                )
+                await user.send(embed=embed)
+                print(f"[DEBUG] Successfully sent success DM to user {user_id} with Riot ID {riot_id}")
+            except discord.Forbidden:
+                print(f"[DEBUG] Failed to send success DM to user {user_id} (DM blocked).")
+            except Exception as dm_error:
+                print(f"[DEBUG] An unexpected error occurred while sending success DM to user {user_id}: {dm_error}")
 
-            await user.send(embed=embed)
-            print(f"[DEBUG] Successfully processed authentication for user {user_id} with Riot ID {riot_id}")
 
         except Exception as e:
             print(f"[DEBUG] An error occurred in on_message webhook processing: {e}")
